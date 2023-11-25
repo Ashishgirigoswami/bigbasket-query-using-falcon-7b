@@ -23,10 +23,14 @@ Used Langchain specifically for querying the BigBasket dataset, enabling focused
 ### Technologies Used
 
 Sentence Transformer: For document embedding generation.
+
 Qdrant DB: For efficient storage and retrieval of embeddings.
+
 Falcon-7B-Instruct Model: For Language Model queries.
+
 Langchain: For specific queries related to the BigBasket dataset.
-Usage
+
+## Code section
 
 ### Server File:
 
@@ -64,6 +68,9 @@ requirements.txt: Lists all necessary dependencies and packages required to run 
 ![IMG_0203](https://github.com/Ashishgirigoswami/bigbasket-query-using-falcon-7b/assets/43043428/d7f9bc91-cb0c-4ce3-a19b-99a63943a6f6)
 
 ## Future Enhancements
+
 Finetuning the falcon-7b model.
-Introducing more advanced NLP models for improved understanding and accuracy in queries
-Creating end-to-end conversational chatbot
+
+Introducing more advanced NLP models for improved understanding and accuracy in queries.
+
+Creating end-to-end conversational chatbot.
