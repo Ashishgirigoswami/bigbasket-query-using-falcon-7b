@@ -1,0 +1,12 @@
+langchain
+accelerate
+bitsandbytes
+git+https://github.com/huggingface/transformers.git
+git+https://github.com/huggingface/peft.git
+langchain
+qdrant-client
+sentence-transformers
+numpy
+pandas
+flask
+torch
