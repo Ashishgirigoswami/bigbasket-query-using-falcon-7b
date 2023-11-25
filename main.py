@@ -9,12 +9,10 @@ import torch
 from langchain.chains import RetrievalQA, RetrievalQAWithSourcesChain
 import time
 from langchain.prompts import PromptTemplate
-from flask_ngrok import run_with_ngrok
 from langchain import HuggingFacePipeline
-#reading dataset file
 app = Flask(__name__)
-# run_with_ngrok(app)
-data = pd.read_csv('bigBasketProducts.csv')
+#reading file
+data = pd.read_csv(r'C:\Users\User\Downloads\bigBasketProducts.csv')
 
 # Combine columns into a meaningful descriptive document
 def create_descriptive_document(row):
@@ -24,6 +22,7 @@ def create_descriptive_document(row):
     document += f"Category: {row['category']}\n"
     document += f"Description: {row['description']}\n"
     document += f"sale_price: {row['sale_price']}\n"
+    document+= f"rating:{row['rating']}\n"
     # Add more columns or modify the concatenation to suit your requirements
     return document
 
@@ -40,7 +39,6 @@ embeddings1 = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
 
 
-print("next")
 qdrant1 = Qdrant1.from_documents(
     dl1,
     embeddings1,
@@ -48,9 +46,6 @@ qdrant1 = Qdrant1.from_documents(
     collection_name="my_documents",
 )
 
-print("done")
-# from llama_index.prompts import PromptTemplate
-# from llama_index.llms import HuggingFaceLLM
 
 quantization_config = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -78,10 +73,10 @@ model.eval()
 pipe = transformers.pipeline(
     "text-generation",
     model=model,
-    man_new_tokens=100,
-    temperature=0.1,
+    max_new_tokens=100,
+    temperature=0.2,
     tokenizer=tokenizer,
-    repetition_penalty=1.2,
+    repetition_penalty=1.5,
     torch_dtype=torch.bfloat16,
     trust_remote_code=True,
     device_map="auto",
@@ -98,15 +93,15 @@ Query:{question}
 """
 
 qa = RetrievalQAWithSourcesChain.from_chain_type(llm=hf_pipeline, chain_type="stuff",
-                                 retriever=qdrant1.as_retriever(search_kwargs={"k": 10}),
-                                 return_source_documents=True,
-                                  chain_type_kwargs={
-                                "prompt": PromptTemplate(
-                                template=template,
-                                input_variables=["summaries","question"],
-                                ),
-                                },
-                                 verbose=False,)
+        retriever=qdrant1.as_retriever(search_kwargs={"k": 5}),
+        return_source_documents=True,
+        chain_type_kwargs={
+    "prompt": PromptTemplate(
+    template=template,
+    input_variables=["summaries","question"],
+    ),
+    },
+        verbose=False,)
 
 
 
@@ -114,7 +109,6 @@ def llmquery(query):
     start_time = time.time()
     try:
         # Record the start time
-        
         response = qa({"question": query})
     except ValueError as e:
         response = str(e)
@@ -136,7 +130,7 @@ def generate_text():
 
     if prompt_text:
         generated_sequence = llmquery(prompt_text)
-        return jsonify({'generated_text': generated_sequence['result']})
+        return jsonify({'generated_text': generated_sequence['answer']})
     else:
         return jsonify({'error': 'Prompt text is missing.'}), 400
     
