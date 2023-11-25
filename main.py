@@ -14,7 +14,7 @@ from langchain import HuggingFacePipeline
 #reading dataset file
 app = Flask(__name__)
 # run_with_ngrok(app)
-data = pd.read_csv('/kaggle/input/bigbasket/bigBasketProducts.csv')
+data = pd.read_csv('bigBasketProducts.csv')
 
 # Combine columns into a meaningful descriptive document
 def create_descriptive_document(row):
@@ -78,8 +78,8 @@ model.eval()
 pipe = transformers.pipeline(
     "text-generation",
     model=model,
-    min_new_tokens=50,
-    temperature=0.01,
+    man_new_tokens=100,
+    temperature=0.1,
     tokenizer=tokenizer,
     repetition_penalty=1.2,
     torch_dtype=torch.bfloat16,
@@ -98,7 +98,7 @@ Query:{question}
 """
 
 qa = RetrievalQAWithSourcesChain.from_chain_type(llm=hf_pipeline, chain_type="stuff",
-                                 retriever=qdrant1.as_retriever(search_kwargs={"k": 3}),
+                                 retriever=qdrant1.as_retriever(search_kwargs={"k": 10}),
                                  return_source_documents=True,
                                   chain_type_kwargs={
                                 "prompt": PromptTemplate(
